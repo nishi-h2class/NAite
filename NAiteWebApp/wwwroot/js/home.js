@@ -126,7 +126,7 @@
                                     filenames.push(link.innerText.trim());
                                 });
                                 var fileName = filenames.join(',');
-                                row.push(input ? input.value : filenames.length > 0 ? fileName : cell.innerText.trim() != '' ? cell.innerText.trim().replace('') : '');
+                                row.push(input ? input.value : filenames.length > 0 ? fileName : cell.innerText.trim());
                             }
                         }
                         console.log(row);
