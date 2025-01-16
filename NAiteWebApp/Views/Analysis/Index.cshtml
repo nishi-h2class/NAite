@@ -1,0 +1,53 @@
+﻿@{
+    ViewData["Title"] = "需給分析";
+}
+<form class="form" method="get" role="form" id="my-app" v-on:submit.prevent="doSubmit">
+    <h2 class="page-title">@ViewData["Title"]</h2>
+    <div id="msg"></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="card-header row p-0">
+                        <div class="col-8">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div style="width: 45%;" class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('startDate') }">
+                                    <input type="date" placeholder="" class="form-control mr-1" id="startDate" name="startDate" v-model="startDate"
+                                           data-vv-as="期間（開始）" v-validate="'required'" v-on:change="changeDate">
+                                    <div class="help-block with-errors" v-show="errors.has('startDate')">
+                                        <ul class="list-unstyled">
+                                            <li class="small" v-cloak>{{ errors.first('startDate') }}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <span>～</span>
+                                <div style="width: 45%;" class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('endDate') }">
+                                    <input type="date" placeholder="" class="form-control mr-1" id="endDate" name="endDate" v-model="endDate"
+                                           data-vv-as="期間（終了）" v-validate="'required'" v-on:change="changeDate">
+                                    <div class="help-block with-errors" v-show="errors.has('endDate')">
+                                        <ul class="list-unstyled">
+                                            <li class="small" v-cloak>{{ errors.first('endDate') }}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chartWrapper px-2 mb-3">
+                        <div class="chartContainer">
+                            <canvas class="w-100 h-100" id="myChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <!-- end content-->
+            </div>
+        </div>
+        <!-- end col-md-12 -->
+    </div>
+    <!-- end row -->
+</form>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js" integrity="sha512-Hn1w6YiiFw6p6S2lXv6yKeqTk0PLVzeCwWY9n32beuPjQ5HLcvz5l2QsP+KilEr1ws37rCTw3bZpvfvVIeTh0Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="~/js/analysis.js" asp-append-version="true"></script>
+}

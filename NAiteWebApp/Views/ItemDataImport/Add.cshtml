@@ -1,0 +1,153 @@
+﻿@{
+    ViewData["Title"] = "商品在庫データ取込画面";
+}
+<form class="form" method="get" role="form" id="my-app" v-on:submit.prevent="doSubmit">
+    <h2 class="page-title">@ViewData["Title"]</h2>
+    <div id="msg"></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="card-header row p-0">
+                        <div class="col-md-6 col-12">
+                            <div class="form-group">
+                                <label><span class="text-danger">※ </span>種別</label>
+                                <div class="form-group has-feedback has-custom-error ml-1">
+                                    <div class="form-check form-check-radio form-check-inline">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="radio" v-model="fileType" value="Shipping"> 出荷
+                                            <span class="circle">
+                                                <span class="check"></span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-radio form-check-inline">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="radio" v-model="fileType" value="ScheduledShipping"> 出荷予定
+                                            <span class="circle">
+                                                <span class="check"></span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-radio form-check-inline">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="radio" v-model="fileType" value="Receving"> 入荷
+                                            <span class="circle">
+                                                <span class="check"></span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-radio form-check-inline">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="radio" v-model="fileType" value="ScheduledReceving"> 入荷予定
+                                            <span class="circle">
+                                                <span class="check"></span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="checkbox-radios ml-1 mt-2" style="height:22px;">
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="checkbox" v-model="isHeader" v-on:change="changeIsHeader" /><span class="form-check-sign"><span class="check"></span></span>一行目はタイトルとして扱う
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <div class="input-group file-input-group">
+                                            <input type="text" placeholder="" class="form-control" v-model="importFileName">
+                                            <label class="input-group-btn">
+                                                <span class="btn" style="border-radius: 0;">
+                                                    ファイル選択<input name="uploadFile" type="file" v-on:change="selectedFile" accept=".csv" style="display:none;" />
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="material-datatables">
+                        <div id="datatables_wrapper" class="dataTables_wrapper dt-bootstrap4">
+                            <div class="row">
+                                <div class="col-6 table-responsive">
+                                    <table class="table table-no-bordered table-hover dataTable dtr-inline" cellspacing="0" style="width:100%">
+                                        <thead v-show="fields.length > 0">
+                                            <tr>
+                                                <th nowrap>タグ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(field, index) in fields" :key="index">
+                                                <td>
+                                                    <select class="form-control position-relative" v-model="fields[index].tag">
+                                                        <option :value="null"></option>
+                                                        <option v-for="option in tags" :value="option.id">{{ option.name }}</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-6 table-responsive">
+                                    <table class="table table-no-bordered table-hover dataTable dtr-inline" cellspacing="0" style="width:100%">
+                                        <thead v-show="dispRows.length > 0">
+                                            <tr>
+                                                <th nowrap v-for="(field, index) in dispRows[0]" :key="index">{{ index + 1 }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody v-show="dispRows.length > 0">
+                                            <tr v-for="(row, index) in dispRows" :key="index">
+                                                <td class="td-min-height" v-for="(item, i) in row" :key="i" style="line-height: 41px;">{{ item }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- end content-->
+            </div>
+            <!--  end card  -->
+            <div class="row">
+                <div class="col-12">
+                    <table class="border-0 m-auto">
+                        <tr>
+                            <td class="text-center">
+                                <div class="checkbox-radios mt-1" style="margin-top:16px;">
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" v-model="isConfirm" /><span class="form-check-sign"><span class="check"></span></span>確認
+                                        </label>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">
+                                <button type="submit" class="btn btn-teal text-center">取込予約</button>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <!-- end col-md-12 -->
+    </div>
+    <!-- end row -->
+</form>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jschardet/3.0.0/jschardet.min.js"></script>
+    <script src="~/js/item-data-import-add.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "商品在庫データ取込管理";
+}
+<form class="form" method="get" role="form" id="my-app" v-on:submit.prevent="doSubmit">
+    <h2 class="page-title">@ViewData["Title"]</h2>
+    <div id="msg"></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="card-header row p-0">
+                        <div class="col-12 text-right">
+                            <a class="text-teal" href="/itemDataImports/new"><i class="fa fa-plus-circle fa-3x" aria-hidden="true"></i></a>
+                        </div>
+                    </div>
+                    <div class="material-datatables">
+                        <div id="datatables_wrapper" class="dataTables_wrapper dt-bootstrap4">
+                            <div class="row">
+                                <div class="col-md-12 table-responsive">
+                                    <table class="table table-no-bordered table-hover dataTable dtr-inline" cellspacing="0" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th nowrap>No.</th>
+                                                <th nowrap>ファイル名</th>
+                                                <th nowrap>予約日時</th>
+                                                <th nowrap>取込日時</th>
+                                                <th nowrap>取込ユーザ</th>
+                                                <th nowrap>レコード数</th>
+                                                <th class="text-center" nowrap>編集</th>
+                                                <th class="text-center" nowrap>DL</th>
+                                                <th class="text-center" nowrap>削除</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- end content-->
+            </div>
+            <!--  end card  -->
+            <div class="row">
+                <div class="col-12 d-flex justify-content-end align-items-center">
+                    <ul class="pagination m-0">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- end col-md-12 -->
+    </div>
+    <!-- end row -->
+</form>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/encoding-japanese/2.0.0/encoding.min.js" integrity="sha512-AhAMtLXTbhq+dyODjwnLcSlytykROxgUhR+gDZmRavVCNj6Gjta5l+8TqGAyLZiNsvJhh3J83ElyhU+5dS2OZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="~/js/item-data-import-list.js" asp-append-version="true"></script>
+}

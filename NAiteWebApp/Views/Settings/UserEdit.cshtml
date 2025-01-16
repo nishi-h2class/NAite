@@ -1,0 +1,155 @@
+﻿@{
+    ViewData["Title"] = "ユーザ編集";
+}
+
+<form class="form" method="post" role="form" id="my-app" v-on:submit.prevent="doSubmit">
+    <h2 class="page-title">@ViewData["Title"]</h2>
+    <div class="card mb-2">
+        <div id="result" class="post-result form-control-feedback with-errors"></div>
+        <div class="card-body ">
+            <div class="row">
+                <div class="col-12">
+                    <h4>ログイン情報</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-3 col-4 d-flex align-items-center">
+                    <label><span class="text-danger">※ </span>社員番号</label>
+                </div>
+                <div class="col-sm-8 col-md-6 col-8">
+                    <div class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('mailaddress') }">
+                        <input type="text" placeholder="" class="form-control" id="loginId" name="loginId" v-model="loginId"
+                               data-vv-as="社員番号" v-validate="'required|max:128'">
+                        <div class="help-block with-errors" v-show="errors.has('loginId')">
+                            <ul class="list-unstyled">
+                                <li class="small" v-cloak>{{ errors.first('loginId') }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-3 col-4 d-flex align-items-center">
+                    <label><span class="text-danger">※ </span>氏名</label>
+                </div>
+                <div class="col-sm-8 col-md-6 col-8">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('lastName') }">
+                                <input type="text" placeholder="" class="form-control" id="lastName" v-model="lastName" name="lastName"
+                                       data-vv-as="姓" v-validate="'required|max:50'">
+                                <div class="help-block with-errors" v-show="errors.has('lastName')">
+                                    <ul class="list-unstyled">
+                                        <li class="small" v-cloak>{{ errors.first('lastName') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('firstName') }">
+                                <input type="text" placeholder="" class="form-control" id="firstName" v-model="firstName" name="firstName"
+                                       data-vv-as="名" v-validate="'required|max:50'">
+                                <div class="help-block with-errors" v-show="errors.has('firstName')">
+                                    <ul class="list-unstyled">
+                                        <li class="small" v-cloak>{{ errors.first('firstName') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-3 col-4 d-flex align-items-center">
+                    <label><span class="text-danger">※ </span>権限</label>
+                </div>
+                <div class="col-sm-8 col-md-6 col-8">
+                    <div class="form-group has-feedback has-custom-error">
+                        <div class="form-check form-check-radio form-check-inline ml-1">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="radio" v-model="authority" value="admin"> 管理者
+                                <span class="circle">
+                                    <span class="check"></span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="radio" v-model="authority" value="user"> ユーザ
+                                <span class="circle">
+                                    <span class="check"></span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-12">
+                    <h4>プロフィール</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-3 col-4 d-flex align-items-center">
+                    <label><span class="text-danger">※ </span>メールアドレス</label>
+                </div>
+                <div class="col-sm-8 col-md-6 col-8">
+                    <div class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('email') }">
+                        <input type="email" placeholder="" class="form-control" id="email" v-model="email" name="email"
+                               data-vv-as="メールアドレス" v-validate="'required|max:256'">
+                        <div class="help-block with-errors" v-show="errors.has('email')">
+                            <ul class="list-unstyled">
+                                <li class="small" v-cloak>{{ errors.first('email') }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-3 col-4 d-flex align-items-center">
+                    <label><span class="text-danger">※ </span>部署名</label>
+                </div>
+                <div class="col-sm-8 col-md-6 col-8">
+                    <div class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('department') }">
+                        <input type="text" placeholder="" class="form-control" id="department" name="department" v-model="department"
+                               data-vv-as="部署名" v-validate="'required|max:50'">
+                        <div class="help-block with-errors" v-show="errors.has('department')">
+                            <ul class="list-unstyled">
+                                <li class="small" v-cloak>{{ errors.first('department') }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-12">
+                    <h4>メール通知</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-3 col-4 d-flex align-items-center">
+                </div>
+                <div class="col-sm-8 col-md-6 col-8">
+                    <div class="checkbox-radios">
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" v-model="isNotifyUpdateData" /><span class="form-check-sign"><span class="check"></span></span>商品データベースの更新
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-right">
+            <button type="submit" class="btn btn-teal btn-fill text-center btn-add"><i class="fa fa-save" style="font-size:x-large;"></i></button>
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <script src="~/js/user-edit.js" asp-append-version="true"></script>
+}
+

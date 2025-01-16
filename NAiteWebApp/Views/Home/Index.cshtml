@@ -1,0 +1,485 @@
+﻿@{
+    ViewData["Title"] = "商品データベース";
+}
+<form class="form" method="get" role="form" id="my-app" v-on:submit.prevent="doSubmit">
+    <h2 class="page-title">@ViewData["Title"]</h2>
+    <div id="msg"></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="card-header row p-0">
+                        <div class="col-12 d-flex align-items-center justify-content-between">
+                            <div>
+                                <a href="#" class="text-teal text-center" v-on:click.prevent="search"><i class="fa fa-search" style="font-size:x-large;"></i></a>
+                            </div>
+                            <div class="text-right">
+                                <button type="submit" class="btn btn-teal text-center mr-1">保存</button>
+                                <button type="button" v-on:click="addField" class="btn btn-teal text-center mr-1"><i class="fa fa-plus mr-2" aria-hidden="true"></i>新規フィールド追加</button>
+                                <button type="button" v-on:click="addRow" class="btn btn-teal text-center mr-1"><i class="fa fa-plus mr-2" aria-hidden="true"></i>新規行追加</button>
+                                <button type="button" v-on:click="download" class="btn btn-teal text-center mr-1"><i class="fa fa-download mr-2" aria-hidden="true"></i>出力</button>
+                                <button type="button" v-on:click="importExcel" class="btn btn-teal text-center"><i class="fa fa-upload mr-2" aria-hidden="true"></i>取込</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="material-datatables">
+                        <div id="datatables_wrapper" class="dataTables_wrapper dt-bootstrap4">
+                            <div class="row">
+                                <div class="col-md-12 table-responsive">
+                                    <table id="itemTable" class="table table-bordered table-striped table-hover dataTable dtr-inline" cellspacing="0" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th nowrap v-for="(field, index) in fields" :key="index" v-on:click="clickCol(field)">
+                                                    <span class="d-inline-block float-left">{{ field.name }}</span>
+                                                    <span v-if="field.type != 'file'" class="sort-btns float-right pl-1">
+                                                        <a href="#" :class="{ 'active': sortKey === field.id && sortOrder === 'asc'}" v-on:click="sortBy(field.id, 'asc', $event)">▲</a>
+                                                        <a href="#" :class="{ 'active': sortKey === field.id && sortOrder === 'desc' }" v-on:click="sortBy(field.id, 'desc', $event)">▼</a>
+                                                    </span>
+                                                    <span class="d-inline-block float-right">
+                                                        <a v-if="index != 0" class="pl-1 pr-1" href="#" v-on:click.prevent="prev(index, $event)"><i class="fas fa-chevron-left"></i></a>
+                                                        <a v-if="(index + 1) != fields.length" class="pl-1 pr-1" href="#" v-on:click.prevent="next(index, $event)"><i class="fas fa-chevron-right"></i></a>
+                                                    </span>
+                                                </th>
+                                                <th nowrap>需給<br />分析</th>
+                                                <th nowrap>削除</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(row, rowIndex) in itemRows" :key="rowIndex">
+                                                <td class="text-center">{{ rowIndex + 1 }}</td>
+                                                <td v-for="(item, itemIndex) in row.items" :key="itemIndex">
+                                                    <input v-if="fields[itemIndex].type != 'file'"
+                                                           :id="`id-${item.id}`"
+                                                           :name="`name-${item.id}`"
+                                                           v-model="item[dynamicField(fields[itemIndex].type)]"
+                                                           class="w-100 border-0"
+                                                           :type="fields[itemIndex].type === 'int' || fields[itemIndex].type === 'decimal' ? 'number' : fields[itemIndex].type === 'date' ? 'date' : fields[itemIndex].type === 'datetime' ? 'datetime-local' : 'text'"
+                                                           :step="fields[itemIndex].type == 'decimal' ? 0.01 : null"
+                                                           :placeholder="fields[itemIndex].name"
+                                                           v-on:change="changeItem(rowIndex, itemIndex)" />
+                                                    <div v-if="fields[itemIndex].type === 'file' && item.files.length > 0" class="mb-1">
+                                                        <div class="d-flex justify-content-between" v-if="fields[itemIndex].type === 'file'" v-for="(file, fileIndex) in item.files" :key="fileIndex">
+                                                            <a class="file" :href="file.url" target="_blank">{{ file.name }}</a>&nbsp;&nbsp;<a class="text-danger delete" href="#" v-on:click.prevent="deleteFile(rowIndex, itemIndex, fileIndex)"><i class="fa fa-trash fa-lg"></i></a>
+                                                        </div>
+                                                    </div>
+                                                    <div v-if="fields[itemIndex].type === 'file'" class="text-center">
+                                                        <a class="text-teal mr-1" href="#" v-on:click.prevent="selectFile(rowIndex, itemIndex)"><i class="fa fa-list-alt fa-lg" aria-hidden="true"></i></a>
+                                                        <a class="text-teal" href="#" v-on:click.prevent="uploadFile(item, rowIndex, itemIndex)"><i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i></a>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center"><a :href="'/analysis/' + row.code" class="text-teal"><i class="fa fa-chart-line" style="font-size:x-large;"></i></a></td>
+                                                <td class="text-center"><a href="#" class="text-danger" v-on:click="deleteRow(row, rowIndex)"><i class="fa fa-trash" style="font-size:x-large;"></i></a></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- end content-->
+            </div>
+            <!--  end card  -->
+            <div class="row">
+                <div class="col-12 d-flex justify-content-end align-items-center">
+                    <ul class="pagination m-0">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- end col-md-12 -->
+    </div>
+    <!-- end row -->
+</form>
+<!-- モーダル・ダイアログ -->
+<div class="modal fade" id="addFieldModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h5 class="modal-title text-center mb-4">新規フィールド追加</h5>
+                <form class="form" method="get" role="form" id="addFieldForm" v-on:submit.prevent="doSubmit">
+                    <div class="row">
+                        <div class="col-4 d-flex align-items-center">
+                            <label><span class="text-danger">※ </span>フィールド名</label>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('name') }">
+                                <input type="text" placeholder="" class="form-control" id="name" name="name" v-model="name"
+                                       data-vv-as="フィールド名" v-validate="'required|max:50'">
+                                <div class="help-block with-errors" v-show="errors.has('name')">
+                                    <ul class="list-unstyled">
+                                        <li class="small" v-cloak>{{ errors.first('name') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 d-flex align-items-center">
+                            <label><span class="text-danger">※ </span>種別</label>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('type') }">
+                                <select class="form-control position-relative mt-2" id="type" name="type" v-model="type" data-vv-as="種別" v-validate="'required'">
+                                    <option :value="null"></option>
+                                    <option v-for="option in types" :value="option.value">{{ option.text }}</option>
+                                </select>
+                                <div class="help-block with-errors" v-show="errors.has('type')">
+                                    <ul class="list-unstyled">
+                                        <li class="small" v-cloak>{{ errors.first('type') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 d-flex align-items-center">
+                            <label>固定フィールド種別</label>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group">
+                                <select class="form-control position-relative mt-2" id="fixedFieldType" name="fixedFieldType" v-model="fixedFieldType">
+                                    <option :value="null"></option>
+                                    <option v-for="option in fixedFieldTypes" :value="option.value">{{ option.text }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 d-flex align-items-center">
+                            <label><span class="text-danger">※ </span>検索対象</label>
+                        </div>
+                        <div class="col-8">
+                            <div class="ml-1 checkbox-radios">
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" v-model="isSearch" /><span class="form-check-sign"><span class="check"></span></span>検索対象
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 d-flex align-items-center">
+                            <label>インポート時列アルファベット</label>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('excelColumnName') }">
+                                <input type="text" placeholder="" class="form-control" id="excelColumnName" name="excelColumnName" v-model="excelColumnName"
+                                       data-vv-as="インポート時列アルファベット" v-validate="'max:10'">
+                                <div class="help-block with-errors" v-show="errors.has('excelColumnName')">
+                                    <ul class="list-unstyled">
+                                        <li class="small" v-cloak>{{ errors.first('excelColumnName') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-teal mt-3">登録</button>
+                        <button type="button" class="btn btn-warning mt-3 ml-2" v-on:click="cancel">キャンセル</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- モーダル・ダイアログ -->
+<div class="modal fade" id="updateFieldModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h5 class="modal-title text-center mb-4">フィールド更新</h5>
+                <form class="form" method="get" role="form" id="updateFieldForm" v-on:submit.prevent="doSubmit">
+                    <div class="row">
+                        <div class="col-4 d-flex align-items-center">
+                            <label><span class="text-danger">※ </span>フィールド名</label>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('name') }">
+                                <input type="text" placeholder="" class="form-control" id="name" name="name" v-model="name"
+                                       data-vv-as="フィールド名" v-validate="'required|max:50'">
+                                <div class="help-block with-errors" v-show="errors.has('name')">
+                                    <ul class="list-unstyled">
+                                        <li class="small" v-cloak>{{ errors.first('name') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 d-flex align-items-center">
+                            <label>固定フィールド種別</label>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group">
+                                <select class="form-control position-relative mt-2" id="fixedFieldType" name="fixedFieldType" v-model="fixedFieldType">
+                                    <option :value="null"></option>
+                                    <option v-for="option in fixedFieldTypes" :value="option.value">{{ option.text }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 d-flex align-items-center">
+                            <label><span class="text-danger">※ </span>検索対象</label>
+                        </div>
+                        <div class="col-8">
+                            <div class="ml-1 checkbox-radios">
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" v-model="isSearch" /><span class="form-check-sign"><span class="check"></span></span>検索対象
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 d-flex align-items-center">
+                            <label>インポート時列アルファベット</label>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('excelColumnName') }">
+                                <input type="text" placeholder="" class="form-control" id="excelColumnName" name="excelColumnName" v-model="excelColumnName"
+                                       data-vv-as="インポート時列アルファベット" v-validate="'max:10'">
+                                <div class="help-block with-errors" v-show="errors.has('excelColumnName')">
+                                    <ul class="list-unstyled">
+                                        <li class="small" v-cloak>{{ errors.first('excelColumnName') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-danger mt-3" v-on:click="deleteItem">削除</button>
+                        <button type="submit" class="btn btn-teal mt-3 ml-2">登録</button>
+                        <button type="button" class="btn btn-warning mt-3 ml-2" v-on:click="cancel">キャンセル</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- モーダル・ダイアログ -->
+<div class="modal fade" id="uploadFileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h5 class="modal-title text-center mb-4">ファイルアップロード</h5>
+                <form class="form" method="get" role="form" id="uploadFileForm" v-on:submit.prevent="doSubmit">
+                    <div class="row">
+                        <div class="col-12">
+                            <div v-show="status == 1" class="uploader" v-on:dragover.prevent v-on:drop.prevent="dropImage($event)">
+                                <svg class="uploader-icon-large" id="グループ_519" xmlns="http://www.w3.org/2000/svg"
+                                     xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 99.123 76.797">
+                                    <path id="パス_502"
+                                          d="M88.273,76.8H10.85A10.862,10.862,0,0,1,0,65.949v-55.1A10.862,10.862,0,0,1,10.85,0H34.262A10.868,10.868,0,0,1,44.973,9.112h43.3a10.862,10.862,0,0,1,10.85,10.85V65.949A10.862,10.862,0,0,1,88.273,76.8M10.85,4.979a5.879,5.879,0,0,0-5.873,5.872v55.1a5.879,5.879,0,0,0,5.873,5.872H88.273a5.879,5.879,0,0,0,5.873-5.872V19.962a5.879,5.879,0,0,0-5.873-5.872H42.623A2.489,2.489,0,0,1,40.135,11.6v-.75a5.879,5.879,0,0,0-5.873-5.872Z"
+                                          fill="#f37e5d" />
+                                    <path id="パス_503"
+                                          d="M99.277,69.382H68.345V47.042H99.277Zm-22.34-18.9H71.782v3.437h5.155ZM95.9,59.149a6.874,6.874,0,1,0-6.873,6.873A6.874,6.874,0,0,0,95.9,59.149m-6.873-3.437a3.437,3.437,0,1,0,3.437,3.437,3.44,3.44,0,0,0-3.437-3.437m-9.19-12.106L82.61,35.98l22.6,8.23-2.5,6.873v10.05l6.874-18.975L80.555,31.576,76.176,43.605h3.659"
+                                          transform="translate(-37 -8)" fill="#f37e5d" />
+                                </svg>
+
+                                <input type="file" ref="image" v-on:change="inputImage" style="display:none;" multiple>
+                                <div class="button-container">
+                                    <button class="btn btn-teal" v-on:click.prevent="selectImage">ファイルのアップロード</button>
+                                </div>
+                                <p class="uploader-message-small">
+                                    <span class="wide-display">アップロードしたいファイルを ここにドラッグ＆ドロップ<br /></span>
+                                </p>
+                            </div>
+                            <div v-show="status == 2" class="uploader">
+                                ファイル名チェック中・・・
+                                <div class="mt-2">
+                                    <div v-for="(name, index) in names" :key="index">{{ name }}<br/></div>
+                                </div>
+                            </div>
+                            <div v-show="status == 3" class="uploader">
+                                <p class="uploader-message-large">ファイル：{{ total }}件</p>
+                                <progress class="uploader-progress" :value="progress" max="100"></progress>
+                                <p class="uploader-message-small">{{ uploaded + 1 }}件目アップロード中</p>
+                            </div>
+                            <div v-show="status == 4" class="uploader">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="46.793"
+                                     height="42.894" viewBox="0 0 46.793 42.894">
+                                    <path id="パス_464" data-name="パス 464"
+                                          d="M35.1,42.895H0V17.548H35.1ZM9.748,21.448H3.9v3.9H9.748Zm21.513,9.836a7.8,7.8,0,1,0-7.8,7.8,7.8,7.8,0,0,0,7.8-7.8m-7.8-3.9a3.9,3.9,0,1,0,3.9,3.9,3.9,3.9,0,0,0-3.9-3.9M13.036,13.649,16.184,5l25.647,9.338-2.837,7.8v11.4l7.8-21.529L13.853,0,8.885,13.649h4.151"
+                                          fill="#f37e5d" />
+                                </svg>
+
+                                <p class="uploader-message-large">アップロードが完了しました</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" v-if="status != 4" class="btn btn-warning mt-3 ml-2" v-on:click="cancel">キャンセル</button>
+                        <button type="button" v-if="status == 4" class="btn btn-warning mt-3 ml-2" v-on:click="cancel">閉じる</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- モーダル・ダイアログ -->
+<div class="modal fade" id="selectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body pt-3">
+                <form class="form mb-0" method="get" role="form" id="selectForm" v-on:submit.prevent="doSubmit">
+                    <h5 class="modal-title text-center mb-2">ファイル選択</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -36px;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <div class="card-header row p-0">
+                                        <div v-show="selecteds.length > 0" class="col-12">
+                                            <div class="form-group">
+                                                <div class="border w-100 p-2">
+                                                    <div class="mr-1 ml-1 d-inline-block" v-for="item in selecteds">[{{ item.name }}]</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="material-datatables">
+                                        <div id="datatables_wrapper" class="dataTables_wrapper dt-bootstrap4">
+                                            <div class="row">
+                                                <div class="col-md-12 table-responsive" style="max-height:500px;overflow-y:auto;">
+                                                    <table class="table table-no-bordered table-hover dataTable selectTable dtr-inline" cellspacing="0" style="width:100%">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>
+                                                                    <div class="checkbox-radios">
+                                                                        <div class="form-check mb-0">
+                                                                            <label class="form-check-label">
+                                                                                <input class="form-check-input" type="checkbox" v-model="isCheckAll" /><span class="form-check-sign"><span class="check"></span></span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </th>
+                                                                <th nowrap>ファイル名</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- end content-->
+                            </div>
+                            <!--  end card  -->
+                            <div class="row">
+                                <div class="col-12 d-flex justify-content-end align-items-center">
+                                    <ul class="pagination m-0">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end col-md-12 -->
+                    </div>
+                    <!-- end row -->
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- モーダル・ダイアログ -->
+<div class="modal fade" id="searchModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h5 class="modal-title text-center mb-4">検索条件</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -54px;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <form class="form" method="get" role="form" id="searchForm" v-on:submit.prevent="doSubmit">
+                    <div class="row" v-for="(field, index) in searchFields" :key="index">
+                        <div class="col-4 d-flex align-items-center">
+                            <label><span class="text-danger">※ </span>{{ field.name }}</label>
+                        </div>
+                        <div class="col-8" v-if="field.type == 'text'">
+                            <div  class="form-group">
+                                <input type="text" placeholder="" class="form-control" v-model="field.text">
+                            </div>
+                        </div>
+                        <div class="col-8" v-if="field.type == 'int' || field.type == 'decimal'">
+                            <div class="form-group d-flex justify-content-between align-items-center">
+                                <input type="number" placeholder="" class="form-control mr-1" v-model="field.intStart">
+                                <span>～</span>
+                                <input type="number" placeholder="" class="form-control ml-1" v-model="field.intEnd">
+                            </div>
+                        </div>
+                        <div class="col-8" v-if="field.type == 'date' || field.type == 'datetime'">
+                            <div class="form-group d-flex justify-content-between align-items-center">
+                                <input type="date" placeholder="" class="form-control mr-1" v-model="field.dateStart">
+                                <span>～</span>
+                                <input type="date" placeholder="" class="form-control ml-1" v-model="field.dateEnd">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-teal mt-3">検索</button>
+                        <button type="button" class="btn btn-warning mt-3 ml-2" v-on:click="clear">条件クリア</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- モーダル・ダイアログ -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h5 class="modal-title text-center mb-4">商品取込</h5>
+                <form class="form" method="get" role="form" id="importForm" v-on:submit.prevent="doSubmit">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="checkbox-radios ml-1 mt-2" style="height:22px;">
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" v-model="isHeader" /><span class="form-check-sign"><span class="check"></span></span>一行目はタイトルとして扱う
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('uploadFile') }">
+                                <div class="input-group file-input-group">
+                                    <input type="text" placeholder="" class="form-control" v-model="importFileName">
+                                    <label class="input-group-btn">
+                                        <span class="btn" style="border-radius: 0;">
+                                            ファイル選択<input name="uploadFile" ref="uploadFile" type="file" v-on:change="selectedFile" accept=".xlsx, .xls" style="display:none;" id="uploadFile" v-model="uploadFile" data-vv-as="ファイル" v-validate="'required'" />
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="help-block with-errors" v-show="errors.has('uploadFile')">
+                                    <ul class="list-unstyled">
+                                        <li class="small" v-cloak>{{ errors.first('uploadFile') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-teal mt-3">取込</button>
+                        <button type="button" class="btn btn-warning mt-3 ml-2" v-on:click="cancel">キャンセル</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jschardet/3.0.0/jschardet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+    <script src="~/js/home.js" asp-append-version="true"></script>
+}

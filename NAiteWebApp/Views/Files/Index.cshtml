@@ -1,0 +1,119 @@
+﻿@{
+    ViewData["Title"] = "画像・ファイル管理";
+}
+<form class="form" method="get" role="form" id="my-app" v-on:submit.prevent="doSubmit">
+    <h2 class="page-title">@ViewData["Title"]</h2>
+    <div id="msg"></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="card-header row p-0">
+                        <div class="col-8">
+                            <div class="input-group file-input-group">
+                                <input type="text" class="form-control" placeholder="ファイル名" v-model="keyword">
+                                <label class="input-group-btn">
+                                    <button class="btn btn-teal" type="submit" style="border-top-left-radius: 0; border-bottom-left-radius: 0;"><i class="fa fa-search"></i></button>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-4 text-right">
+                            <a class="text-teal" href="#" v-on:click.prevent="uploadFile"><i class="fa fa-plus-circle fa-3x" aria-hidden="true"></i></a>
+                        </div>
+                    </div>
+                    <div class="material-datatables">
+                        <div id="datatables_wrapper" class="dataTables_wrapper dt-bootstrap4">
+                            <div class="row">
+                                <div class="col-md-12 table-responsive">
+                                    <table class="table table-no-bordered table-hover dataTable dtr-inline" cellspacing="0" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th nowrap>ファイル名</th>
+                                                <th class="text-center" nowrap>削除</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- end content-->
+            </div>
+            <!--  end card  -->
+            <div class="row">
+                <div class="col-12 d-flex justify-content-end align-items-center">
+                    <ul class="pagination m-0">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- end col-md-12 -->
+    </div>
+    <!-- end row -->
+</form>
+<!-- モーダル・ダイアログ -->
+<div class="modal fade" id="uploadFileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h5 class="modal-title text-center mb-4">ファイルアップロード</h5>
+                <form class="form" method="get" role="form" id="uploadFileForm" v-on:submit.prevent="doSubmit">
+                    <div class="row">
+                        <div class="col-12">
+                            <div v-show="status == 1" class="uploader" v-on:dragover.prevent v-on:drop.prevent="dropImage($event)">
+                                <svg class="uploader-icon-large" id="グループ_519" xmlns="http://www.w3.org/2000/svg"
+                                     xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 99.123 76.797">
+                                    <path id="パス_502"
+                                          d="M88.273,76.8H10.85A10.862,10.862,0,0,1,0,65.949v-55.1A10.862,10.862,0,0,1,10.85,0H34.262A10.868,10.868,0,0,1,44.973,9.112h43.3a10.862,10.862,0,0,1,10.85,10.85V65.949A10.862,10.862,0,0,1,88.273,76.8M10.85,4.979a5.879,5.879,0,0,0-5.873,5.872v55.1a5.879,5.879,0,0,0,5.873,5.872H88.273a5.879,5.879,0,0,0,5.873-5.872V19.962a5.879,5.879,0,0,0-5.873-5.872H42.623A2.489,2.489,0,0,1,40.135,11.6v-.75a5.879,5.879,0,0,0-5.873-5.872Z"
+                                          fill="#f37e5d" />
+                                    <path id="パス_503"
+                                          d="M99.277,69.382H68.345V47.042H99.277Zm-22.34-18.9H71.782v3.437h5.155ZM95.9,59.149a6.874,6.874,0,1,0-6.873,6.873A6.874,6.874,0,0,0,95.9,59.149m-6.873-3.437a3.437,3.437,0,1,0,3.437,3.437,3.44,3.44,0,0,0-3.437-3.437m-9.19-12.106L82.61,35.98l22.6,8.23-2.5,6.873v10.05l6.874-18.975L80.555,31.576,76.176,43.605h3.659"
+                                          transform="translate(-37 -8)" fill="#f37e5d" />
+                                </svg>
+
+                                <input type="file" ref="image" v-on:change="inputImage" style="display:none;" multiple>
+                                <div class="button-container">
+                                    <button class="btn btn-teal" v-on:click.prevent="selectImage">ファイルのアップロード</button>
+                                </div>
+                                <p class="uploader-message-small">
+                                    <span class="wide-display">アップロードしたいファイルを ここにドラッグ＆ドロップ<br /></span>
+                                </p>
+                            </div>
+                            <div v-show="status == 2" class="uploader">
+                                ファイル名チェック中・・・
+                                <div class="mt-2">
+                                    <div v-for="(name, index) in names" :key="index">{{ name }}<br /></div>
+                                </div>
+                            </div>
+                            <div v-show="status == 3" class="uploader">
+                                <p class="uploader-message-large">ファイル：{{ total }}件</p>
+                                <progress class="uploader-progress" :value="progress" max="100"></progress>
+                                <p class="uploader-message-small">{{ uploaded + 1 }}件目アップロード中</p>
+                            </div>
+                            <div v-show="status == 4" class="uploader">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="46.793"
+                                     height="42.894" viewBox="0 0 46.793 42.894">
+                                    <path id="パス_464" data-name="パス 464"
+                                          d="M35.1,42.895H0V17.548H35.1ZM9.748,21.448H3.9v3.9H9.748Zm21.513,9.836a7.8,7.8,0,1,0-7.8,7.8,7.8,7.8,0,0,0,7.8-7.8m-7.8-3.9a3.9,3.9,0,1,0,3.9,3.9,3.9,3.9,0,0,0-3.9-3.9M13.036,13.649,16.184,5l25.647,9.338-2.837,7.8v11.4l7.8-21.529L13.853,0,8.885,13.649h4.151"
+                                          fill="#f37e5d" />
+                                </svg>
+
+                                <p class="uploader-message-large">アップロードが完了しました</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" v-if="status != 4" class="btn btn-warning mt-3 ml-2" v-on:click="cancel">キャンセル</button>
+                        <button type="button" v-if="status == 4" class="btn btn-warning mt-3 ml-2" v-on:click="cancel">閉じる</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/js/file-list.js" asp-append-version="true"></script>
+}

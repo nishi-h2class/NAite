@@ -1,0 +1,259 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/assets/img/apple-icon.png">
+    <link rel="icon" type="image/png" href="/assets/img/favicon.png">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>@ViewData["Title"] - NAite</title>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="~/assets/css/material-dashboard.css" />
+    <link rel="stylesheet" href="~/assets/demo/demo.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/NAiteWebApp.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div id="pageloading-wrap">
+        <div>
+            <div id="pageloading-icon" class="ball-pulse-sync"><i class="fa fa-spinner fa-pulse fa-3x fa-fw" style="font-size:50px;color:#FFF"></i></div>
+        </div>
+    </div>
+    <div class="wrapper">
+        <div class="sidebar" data-color="teal" data-background-color="black">
+            <!--
+                Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
+
+                Tip 2: you can also add an image using data-image tag
+            -->
+            <div class="logo">
+                <a href="/" class="simple-text logo-mini">
+                    <i class="material-icons">dashboard</i>
+                </a>
+                <a href="/" class="simple-text logo-normal">商品管理システム</a>
+            </div>
+            <div class="sidebar-wrapper" id="sidebarSupportedContent">
+                <ul class="nav">
+                    <li class="nav-item ">
+                        <a class="nav-link" href="/">
+                            <i class="material-icons">table</i>
+                            <p> 商品・データベース</p>
+                        </a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link" href="/files">
+                            <i class="material-icons">folder</i>
+                            <p> 画像・ファイル</p>
+                        </a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link" href="/itemDataImports">
+                            <i class="material-icons">upload</i>
+                            <p> 商品在庫データ取込</p>
+                        </a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link" data-toggle="collapse" href="#menuSettings">
+                            <i class="material-icons">settings</i>
+                            <p> 設定<b class="caret"></b></p>
+                        </a>
+                        <div class="collapse" id="menuSettings">
+                            <ul class="nav">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/settings/users" data-sub-links="/settings/users/new">
+                                        <span class="sidebar-mini"></span>
+                                        <span class="sidebar-normal"> ユーザ</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="main-panel">
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
+                <div class="container-fluid">
+                    <div class="navbar-wrapper">
+                        <div class="navbar-minimize">
+                            <button id="minimizeSidebar" class="btn btn-just-icon btn-teal btn-fab btn-round">
+                                <i class="material-icons text_align-center visible-on-sidebar-regular">more_vert</i>
+                                <i class="material-icons design_bullet-list-67 visible-on-sidebar-mini">view_list</i>
+                            </button>
+                        </div>
+                        <a id="pageBack" class="btn btn-just-icon btn-info btn-fab btn-round ml-3" href="javascript:void(0);">
+                            <i class="material-icons text_align-center">arrow_back</i>
+                        </a>
+                    </div>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="navbar-toggler-icon icon-bar"></span>
+                        <span class="navbar-toggler-icon icon-bar"></span>
+                        <span class="navbar-toggler-icon icon-bar"></span>
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                        <div class="navbar-form"><span>{{ userName }}</span></div>
+                        <ul class="navbar-nav">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link" href="#pablo" id="navbarDropdownProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="material-icons">person</i>
+                                    <p class="d-lg-none d-md-block">
+                                        <span>{{ userName }}</span>
+                                    </p>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownProfile">
+                                    <a class="dropdown-item" id="link_logout" href="javascript:void(0);">ログアウト</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <!-- End Navbar -->
+            <div class="content">
+                <div class="content">
+                    <div class="container-fluid">
+                        @RenderBody()
+                        <!-- モーダル・ダイアログ -->
+                        <div class="modal fade" id="dataImportModal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-body">
+                                        <h5 class="modal-title text-center mb-4">データインポート</h5>
+                                        <form class="form" method="get" role="form" id="dataImportForm" v-on:submit.prevent="doSubmit">
+                                            @* <div class="row">
+                                                <div class="col-12">
+                                                    <div class="form-group">
+                                                        <div class="input-group file-input-group">
+                                                            <input type="text" placeholder="" class="form-control" v-model="importFileName">
+                                                            <label class="input-group-btn">
+                                                                <span class="btn" style="border-radius: 0;">
+                                                                    ファイル選択<input name="uploadFile" type="file" v-on:change="selectedFile" accept=".csv" style="display:none;" />
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="checkbox-radios">
+                                                        <div class="form-check">
+                                                            <label class="form-check-label">
+                                                                <input class="form-check-input" type="checkbox" v-model="isHeader" v-on:change="changeIsHeader" /><span class="form-check-sign"><span class="check"></span></span>一行目はタイトルとして扱う
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-center mt-4">
+                                                <button type="submit" class="btn btn-teal mt-3">アップロード</button>
+                                                <button type="button" class="btn btn-warning mt-3 ml-2" v-on:click="cancel">キャンセル</button>
+                                            </div> *@
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="footer">
+                <div class="container-fluid">
+                    <p>&copy;2024 - NAite</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="~/assets/js/core/jquery.min.js"></script>
+    <script src="~/assets/js/core/popper.min.js"></script>
+    <script src="~/assets/js/core/bootstrap-material-design.min.js"></script>
+    <script src="~/lib/vue@2.6.11.min.js"></script>
+    <script src="~/lib/vee-validate.min.js"></script>
+    <script src="~/lib/vee-validate-ja.min.js"></script>
+    <script src="~/lib/moment-with-locales.js"></script>
+    <script src="~/lib/jquery.cookie.min.js"></script>
+    <script src="~/assets/js/plugins/perfect-scrollbar.jquery.min.js"></script>
+    <script src="~/assets/js/plugins/sweetalert2.js"></script>
+    <script src="~/assets/js/material-dashboard.js"></script>
+    <script src="~/assets/demo/demo.js"></script>
+    <script src="~/js/naite.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            // pageBack
+            $(document).on('click', '#pageBack', function () {
+                history.back();
+            });
+
+            // vue init
+            naite.initVue();
+
+            //nav set active
+            var path = location.pathname;
+            path = path.replace('/Index', '');
+            $('.sidebar-wrapper .nav .nav-item').removeClass('active');
+            $('.sidebar-wrapper .nav .nav-item').each(function () {
+                var href = $(this).children('a').attr('href');
+                var hrefs = [];
+                var _hrefs = $(this).children('a').attr('data-sub-links');
+                if (_hrefs !== null && _hrefs !== undefined) {
+                    hrefs = _hrefs.split(',');
+                }
+                hrefs.push(href);
+                for (var i = 0; i < hrefs.length; i++) {
+                    if (path.toLowerCase() === hrefs[i].toLowerCase()) {
+                        $(this).addClass('active');
+                        if ($(this).parent().parent().parent().hasClass('nav-item')) {
+                            $(this).parent().parent().parent().addClass('active');
+                            $(this).parent().parent().parent().children('a').trigger('click');
+                        }
+                        break;
+                    }
+                }
+            });
+
+            // ナビゲーションメニュー
+            naite.navbarvuemodel = new Vue({
+                el: '#navbarSupportedContent',
+                data: {
+                    userName: $.cookie('userName').trim(),
+                    userId: $.cookie('userId').trim()
+                },
+                mounted: function () {
+                    naite.navbarvuemodel = this;
+                    console.log('cookie');
+                    console.log($.cookie('userName'));
+                    console.log($.cookie('userId'));
+                }
+            });
+
+            // ログアウト
+            $(document).on('click', '#link_logout', function () {
+                $.removeCookie("userName");
+                $.removeCookie("userId");
+                $.removeCookie("accessToken");
+                $.removeCookie("authority");
+                naite.redirect(naite.urls.login);
+            });
+
+            // サイドメニューのスクロール
+            isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
+            if (isWindows) {
+                // if we are on windows OS we activate the perfectScrollbar function
+                $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar();
+
+                $('html').addClass('perfect-scrollbar-on');
+            } else {
+                $('html').addClass('perfect-scrollbar-off');
+            }
+
+
+
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

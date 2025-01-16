@@ -1,0 +1,62 @@
+﻿@{
+    ViewData["Title"] = "ユーザ管理";
+}
+<form class="form" method="get" role="form" id="my-app" v-on:submit.prevent="doSubmit">
+    <h2 class="page-title">@ViewData["Title"]</h2>
+    <div id="msg"></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="card-header row p-0">
+                        <div class="col-8">
+                            <div class="input-group file-input-group">
+                                <input type="text" class="form-control" placeholder="社員番号・氏名" v-model="keyword">
+                                <label class="input-group-btn">
+                                    <button class="btn btn-teal" type="submit" style="border-top-left-radius: 0; border-bottom-left-radius: 0;"><i class="fa fa-search"></i></button>
+                                </label>
+                            </div>
+                        </div>
+                        <div v-if="isAdmin" class="col-4 text-right">
+                            <a class="text-teal" href="/settings/users/new"><i class="fa fa-plus-circle fa-3x" aria-hidden="true"></i></a>
+                        </div>
+                    </div>
+                    <div class="material-datatables">
+                        <div id="datatables_wrapper" class="dataTables_wrapper dt-bootstrap4">
+                            <div class="row">
+                                <div class="col-md-12 table-responsive">
+                                    <table class="table table-no-bordered table-hover dataTable dtr-inline" cellspacing="0" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th nowrap>社員番号</th>
+                                                <th nowrap>氏名</th>
+                                                <th nowrap>権限</th>
+                                                <th v-if="isAdmin" class="text-center" nowrap>編集</th>
+                                                <th v-if="isAdmin" class="text-center" nowrap>削除</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- end content-->
+            </div>
+            <!--  end card  -->
+            <div class="row">
+                <div class="col-12 d-flex justify-content-end align-items-center">
+                    <ul class="pagination m-0">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- end col-md-12 -->
+    </div>
+    <!-- end row -->
+</form>
+@section Scripts {
+    <script src="~/js/user-list.js" asp-append-version="true"></script>
+}
