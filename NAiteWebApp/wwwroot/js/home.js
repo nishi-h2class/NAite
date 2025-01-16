@@ -102,18 +102,34 @@
                     var data = [];
                     for (var i = 0; i < table.rows.length; i++) {
                         var row = [];
-                        for (var j = 0; j < table.rows[i].cells.length; j++) {
-                            var cell = table.rows[i].cells[j];
-                            // セル内に<input>がある場合はその値を取得、それ以外はセルのテキストを取得
-                            var input = cell.querySelector('input');
-                            var links = cell.querySelectorAll('a.file');
-                            var filenames = [];
-                            links.forEach(function (link) {
-                                filenames.push(link.innerText.trim());
-                            });
-                            var fileName = filenames.join(',');
-                            row.push(input ? input.value : fileName ? fileName : cell.innerText.replace(''));
+                        var cells = table.rows[i].cells;
+                        for (var j = 0; j < cells.length; j++) {
+                            
+                            if (j == 0 || j == (cells.length - 1) || j == (cells.length - 2)) {
+                                continue;
+                            }
+
+                            var cell = cells[j];
+                            if (cell.tagName === "TH") {
+                                var spanElement = cell.querySelector('.d-inline-block.float-left');
+                                if (spanElement == null) {
+                                    continue;
+                                }
+                                var text = spanElement.textContent.trim();
+                                row.push(text);
+                            } else {
+                                // セル内に<input>がある場合はその値を取得、それ以外はセルのテキストを取得
+                                var input = cell.querySelector('input');
+                                var links = cell.querySelectorAll('a.file');
+                                var filenames = [];
+                                links.forEach(function (link) {
+                                    filenames.push(link.innerText.trim());
+                                });
+                                var fileName = filenames.join(',');
+                                row.push(input ? input.value : filenames.length > 0 ? fileName : cell.innerText.trim() != '' ? cell.innerText.trim().replace('') : '');
+                            }
                         }
+                        console.log(row);
                         data.push(row);
                     }
                     return data;
