@@ -213,8 +213,8 @@ namespace NAiteWebApi.Controllers
                                     {
                                         var value = row.Cell(field.ExcelColumnName.ToUpper()).GetValue<string>();
                                         ItemService.SetItemValue(value, field.Type, ref itemEntity!, _repository);
-                                        _repository.Item.CreateItem(itemEntity);
                                     }
+                                    _repository.Item.CreateItem(itemEntity);
                                 }
                             }
                             else

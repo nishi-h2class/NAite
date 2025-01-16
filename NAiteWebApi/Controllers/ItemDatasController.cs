@@ -62,7 +62,7 @@ namespace NAiteWebApi.Controllers
 
             // 棚卸数量
             var inventoryQuantityItem = itemRow.Items.Where(a => a.ItemField.FixedFieldType == "InventoryQuantity").FirstOrDefault();
-            var inventoryQuantity = inventoryQuantityItem == null ? 0 : (int)inventoryQuantityItem.ValueInt!;
+            var inventoryQuantity = inventoryQuantityItem == null ? 0 : inventoryQuantityItem.ValueInt == null ? 0 : (int)inventoryQuantityItem.ValueInt!;
 
             // 在庫閾値
             var stockThresholdItem = itemRow.Items.Where(a => a.ItemField.FixedFieldType == "StockThreshold").FirstOrDefault();
