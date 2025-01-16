@@ -259,4 +259,8 @@
             }
         });
     });
+
+    $('#uploadFileModal').on('hidden.bs.modal', function (e) {
+        naite.uploadFileVuemodel.resetStatus();
+    });
 });

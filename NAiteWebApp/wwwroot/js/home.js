@@ -809,6 +809,10 @@
         });
     });
 
+    $('#uploadFileModal').on('hidden.bs.modal', function (e) {
+        naite.uploadFileVuemodel.resetStatus();
+    });
+
     $('#selectModal').on('show.bs.modal', function (e) {
         naite.initPagination(getSelectPage);
         getSelectPage(1);
