@@ -19,5 +19,9 @@ namespace NAiteWebApi.DataTransferObjects.Parameters
 
         [DisplayName("種別")]
         public string? Type { get; set; } = null!;
+
+        [DisplayName("ラベル種別")]
+        [Required(ErrorMessage = "ラベル種別は必須です")]
+        public string Labeltype { get; set; } = null!;
     }
 }

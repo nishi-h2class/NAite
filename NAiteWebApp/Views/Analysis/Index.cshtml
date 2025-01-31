@@ -9,11 +9,18 @@
             <div class="card mb-2">
                 <div class="card-body">
                     <div class="card-header row p-0">
-                        <div class="col-8">
+                        <div class="col-12 col-sm-4 col-lg-3">
+                            <div class="form-group" style="margin-top:12px;">
+                                <select class="form-control position-relative mt-2" id="term" name="term" v-model="term" v-on:change="changeDate">
+                                    <option v-for="option in terms" :value="option.value">{{ option.text }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-8 col-lg-6" v-show="term == null">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div style="width: 45%;" class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('startDate') }">
                                     <input type="date" placeholder="" class="form-control mr-1" id="startDate" name="startDate" v-model="startDate"
-                                           data-vv-as="期間（開始）" v-validate="'required'" v-on:change="changeDate">
+                                           data-vv-as="期間（開始）" v-validate="term == null ? 'required' : ''" v-on:change="changeDate">
                                     <div class="help-block with-errors" v-show="errors.has('startDate')">
                                         <ul class="list-unstyled">
                                             <li class="small" v-cloak>{{ errors.first('startDate') }}</li>
@@ -23,7 +30,7 @@
                                 <span>～</span>
                                 <div style="width: 45%;" class="form-group has-feedback has-custom-error" :class="{ 'has-error': errors.has('endDate') }">
                                     <input type="date" placeholder="" class="form-control mr-1" id="endDate" name="endDate" v-model="endDate"
-                                           data-vv-as="期間（終了）" v-validate="'required'" v-on:change="changeDate">
+                                           data-vv-as="期間（終了）" v-validate="term == null ? 'required' : ''" v-on:change="changeDate">
                                     <div class="help-block with-errors" v-show="errors.has('endDate')">
                                         <ul class="list-unstyled">
                                             <li class="small" v-cloak>{{ errors.first('endDate') }}</li>
@@ -32,10 +39,30 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-12 col-sm-8 col-lg-3">
+                            <div class="form-group has-feedback has-custom-error pt-1">
+                                <div class="form-check form-check-radio form-check-inline ml-1 mr-0">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="radio" v-model="labelType" value="day" v-on:change="changeDate"> 日次
+                                        <span class="circle">
+                                            <span class="check"></span>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-radio form-check-inline mr-0">
+                                    <label class="form-check-label pr-0">
+                                        <input class="form-check-input" type="radio" v-model="labelType" value="month" v-on:change="changeDate"> 月次
+                                        <span class="circle">
+                                            <span class="check"></span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="chartWrapper px-2 mb-3">
                         <div class="chartContainer">
-                            <canvas class="w-100 h-100" id="myChart"></canvas>
+                            <canvas class="h-100" id="myChart"></canvas>
                         </div>
                     </div>
                 </div>

@@ -6,8 +6,28 @@
         el: '#my-app',
         data: {
             code: naite.getPathId(),
-            startDate: paramArray.startDate || null,
-            endDate: paramArray.endDate || null
+            startDate: paramArray.startDate || $.cookie('startDate') || null,
+            endDate: paramArray.endDate || $.cookie('endDate') || null,
+            labelType: paramArray.labelType || $.cookie('labelType') || 'day',
+            term: paramArray.term || $.cookie('term') || null,
+            terms: [
+                { text: 'カスタム期間', value: null, plus: 0, minus: 0 },
+                { text: '+3月', value: 1, plus: 3, minus: 0 },
+                { text: '+6月', value: 2, plus: 6, minus: 0 },
+                { text: '+12月', value: 3, plus: 12, minus: 0 },
+                { text: '-1月+3月', value: 4, plus: 3, minus: 1 },
+                { text: '-1月+6月', value: 5, plus: 6, minus: 1 },
+                { text: '-1月+12月', value: 6, plus: 12, minus: 1 },
+                { text: '-3月+3月', value: 7, plus: 3, minus: 3 },
+                { text: '-3月+6月', value: 8, plus: 6, minus: 3 },
+                { text: '-3月+12月', value: 9, plus: 12, minus: 3 },
+                { text: '-6月+3月', value: 10, plus: 3, minus: 6 },
+                { text: '-6月+6月', value: 11, plus: 6, minus: 6 },
+                { text: '-6月+12月', value: 12, plus: 12, minus: 6 },
+                { text: '-12月+3月', value: 13, plus: 3, minus: 12 },
+                { text: '-12月+6月', value: 14, plus: 6, minus: 12 },
+                { text: '-12月+12月', value: 15, plus: 12, minus: 12 }
+            ]
         },
         mounted: function () {
             naite.vuemodel = this;
@@ -33,16 +53,57 @@
                             var item = JSON.parse(JSON.stringify(naite.vuemodel.$data));
                             // URLに新しいクエリストリングを付与
                             var query = "";
-                            if (item.startDate) query += "&startDate=" + encodeURIComponent(item.startDate);
-                            if (item.endDate) query += "&endDate=" + encodeURIComponent(item.endDate);
+                            if (item.startDate) {
+                                query += "&startDate=" + encodeURIComponent(item.startDate);
+                                $.cookie('startDate', item.startDate, { expires: 30, path: "/" });
+                            } else {
+                                $.removeCookie('startDate', { path: '/' });
+                            }
+                            if (item.endDate) {
+                                query += "&endDate=" + encodeURIComponent(item.endDate);
+                                $.cookie('endDate', item.endDate, { expires: 30, path: "/" });
+                            } else {
+                                $.removeCookie('endDate', { path: '/' });
+                            }
+                            if (item.labelType) {
+                                query += "&labelType=" + encodeURIComponent(item.labelType);
+                                $.cookie('labelType', item.labelType, { expires: 30, path: "/" });
+                            } else {
+                                $.removeCookie('labelType', { path: '/' });
+                            }
+                            if (item.term) {
+                                query += "&term=" + encodeURIComponent(item.term);
+                                $.cookie('term', item.term, { expires: 30, path: "/" });
+                            } else {
+                                $.removeCookie('term', { path: '/' });
+                            } 
                             if (query.length > 0) query = "?" + query.substr(1);
                             window.history.replaceState(null, null, $(location).attr('pathname') + query);
 
                             param = {
                                 Code: this.code,
                                 StartDate: this.startDate,
-                                EndDate: this.endDate
+                                EndDate: this.endDate,
+                                LabelType: this.labelType
                             };
+
+                            if (this.term != null) {
+                                let t = this.terms.filter(a => a.value == this.term)[0];
+                                let today = new Date();
+                                let _nextMonth = new Date(today);
+                                _nextMonth.setMonth(_nextMonth.getMonth() + t.plus);
+                                console.log(_nextMonth);
+                                nextMonth = new Date(_nextMonth.getFullYear(), _nextMonth.getMonth() + 1, 0);
+                                console.log(nextMonth);
+                                let prevMonth = new Date(today);
+                                prevMonth.setMonth(prevMonth.getMonth() - t.minus);
+                                console.log(prevMonth);
+                                param.StartDate = naite.dateFormatToString(prevMonth, 'YYYY-MM-DD');
+                                param.EndDate = naite.dateFormatToString(nextMonth, 'YYYY-MM-DD');
+                            }
+
+                            console.log(param);
+
                             naite.get(naite.apiUrls.itemDatas, param)
                                 .done(function (data) {
                                     console.log(data);

@@ -64,10 +64,14 @@
 
                 $('.dataTable tbody').empty();
                 for (var i = 0; i < data.length; i++) {
+                    var image = '';
+                    if (data[i].type.toLowerCase().startsWith('image')) {
+                        image = $('<a target="_blank"></a>').attr('href', data[i].url).append($('<div class="mr-2 d-inline-block" style="width:100px;"></div>').append($('<img class="w-100">').attr('src', data[i].url).attr('alt', data[i].name)));
+                    }
                     $('.dataTable tbody').append(
                         $('<tr></tr>')
                             .append(
-                                $('<td></td>').append($('<a target="_blank"></a>').attr('href', data[i].url).text(data[i].name))
+                                $('<td></td>').append(image).append($('<a target="_blank"></a>').attr('href', data[i].url).text(data[i].name))
                             )
                             .append(
                                 $('<td class="text-center" style="width:40px;"></td>')

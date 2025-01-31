@@ -163,10 +163,24 @@ namespace NAiteWebApi.Controllers
 
                     count++;
                 }
-            }            
+            }
 
-            var labels = itemDataList.Where(a => a.Date >= startDate).Where(a => a.Date <= endDate).Select(a => a.Date.ToString("MM/dd")).ToArray();
-            var datas = itemDataList.Where(a => a.Date >= startDate).Where(a => a.Date <= endDate).Select(a => a.Quantity).ToArray();
+            string[]? labels;
+            int[]? datas;
+
+            if (param.Labeltype == "day")
+            {
+                labels = itemDataList.Where(a => a.Date >= startDate).Where(a => a.Date <= endDate).Select(a => a.Date.ToString("M/d")).ToArray();
+                datas = itemDataList.Where(a => a.Date >= startDate).Where(a => a.Date <= endDate).Select(a => a.Quantity).ToArray();
+            } 
+            else
+            {
+                var dateList = itemDataList.Where(a => a.Date >= startDate).Where(a => a.Date <= endDate).Select(a => a.Date).ToArray();
+                var monthEndDateList = dateList.Where(date => date.Day == DateTime.DaysInMonth(date.Year, date.Month)).ToArray();
+                labels = monthEndDateList.Select(a => a.Date.ToString("M月")).ToArray();
+                datas = itemDataList.Where(a => monthEndDateList.Contains(a.Date)).Select(a => a.Quantity).ToArray();
+            }
+            
 
             var graphDatas = new List<GraphData>
                 {

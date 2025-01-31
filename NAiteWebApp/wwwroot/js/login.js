@@ -27,10 +27,10 @@
 							naite.post(naite.apiUrls.auth, param)
 								.done(function (data) {
 									console.log(data);
-									$.cookie('accessToken', data.token, { expires: 30, path: "/", domain: $("#Domain").val()/*, secure: true */ });
-									$.cookie('userId', data.id, { expires: 30, path: "/", domain: $("#Domain").val()/*, secure: true */ });
-									$.cookie('userName', data.name, { expires: 30, path: "/", domain: $("#Domain").val()/*, secure: true */ });
-									$.cookie('authority', data.authority, { expires: 30, path: "/", domain: $("#Domain").val()/*, secure: true */ });
+									$.cookie('accessToken', data.token, { expires: 30, path: "/" });
+									$.cookie('userId', data.id, { expires: 30, path: "/" });
+									$.cookie('userName', data.name, { expires: 30, path: "/" });
+									$.cookie('authority', data.authority, { expires: 30, path: "/" });
 									naite.redirect(naite.urls.home);
 								})
 								.fail(function (error) {
